@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <title>Իմ Ծախսերը</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f4f4f9; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 350px; }
+        h2 { color: #333; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        .result { margin-top: 20px; padding: 10px; background: #e9ecef; border-radius: 5px; }
+        .history { margin-top: 15px; font-size: 0.9em; max-height: 150px; overflow-y: auto; border-top: 1px solid #ddd; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Ճանապարհածախս</h2>
+    <input type="number" id="expenseInput" placeholder="Մուտքագրեք գումարը (դրամ)">
+    <button onclick="addExpense()">Ավելացնել ծախսը</button>
+
+    <div class="result">
+        <strong>Ընդհանուր ծախս: </strong> <span id="totalDisplay">0</span> դրամ
+    </div>
+
+    <div class="history" id="historyLog">
+        <strong>Պատմություն:</strong>
+    </div>
+    <br>
+    <button style="background-color: #dc3545;" onclick="clearData()">Մաքրել հիշողությունը</button>
+</div>
+
+<script>
+    // Վերցնում ենք տվյալները հիշողությունից կամ ստեղծում դատարկ ցուցակ
+    let expenses = JSON.parse(localStorage.getItem('transportData')) || [];
+
+    function updateUI() {
+        let total = expenses.reduce((sum, item) => sum + item.amount, 0);
+        document.getElementById('totalDisplay').innerText = total;
+
+        let historyHtml = '<strong>Պատմություն:</strong><br>';
+        expenses.forEach(item => {
+            historyHtml += `<div>${item.date}: ${item.amount} դրամ</div>`;
+        });
+        document.getElementById('historyLog').innerHTML = historyHtml;
+    }
+
+    function addExpense() {
+        let input = document.getElementById('expenseInput');
+        let amount = parseFloat(input.value);
+
+        if (!isNaN(amount) && amount > 0) {
+            let record = {
+                amount: amount,
+                date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString()
+            };
+            expenses.push(record);
+            localStorage.setItem('transportData', JSON.stringify(expenses));
+            input.value = ''; // Մաքրել դաշտը
+            updateUI();
+        } else {
+            alert("Խնդրում ենք մուտքագրել ճիշտ թիվ:");
+        }
+    }
+
+    function clearData() {
+        if(confirm("Վստա՞հ եք, որ ուզում եք ջնջել բոլոր տվյալները:")) {
+            localStorage.removeItem('transportData');
+            expenses = [];
+            updateUI();
+        }
+    }
+
+    // Առաջին անգամ բեռնելիս թարմացնել էկրանը
+    updateUI();
+</script>
+
+</body>
+</html>
