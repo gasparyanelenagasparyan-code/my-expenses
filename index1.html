@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <title>Իմ Ծախսերի Օրագիրը</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; color: #1a73e8; }
+        select, input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:hover { background-color: #1557b0; }
+        .summary { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 5px solid #1a73e8; }
+        .summary div { margin: 5px 0; font-weight: bold; }
+        .history { margin-top: 20px; max-height: 200px; overflow-y: auto; font-size: 14px; border-top: 1px solid #eee; padding-top: 10px; }
+        .item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #fafafa; }
+        .clear-btn { background-color: #dc3545; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>💰 Ծախսերի Հաշվիչ</h2>
+    
+    <label>Ընտրեք տեսակը.</label>
+    <select id="category">
+        <option value="Ճանապարհ">🚗 Ճանապարհ</option>
+        <option value="Սնունդ">🍔 Սնունդ</option>
+        <option value="Այլ">📦 Այլ</option>
+    </select>
+
+    <input type="number" id="amount" placeholder="Գումարը (դրամ)">
+    <button onclick="addExpense()">Ավելացնել ծախսը</button>
+
+    <div class="summary">
+        <div style="color: #d93025;">🍔 Սնունդ: <span id="totalFood">0</span> դրամ</div>
+        <div style="color: #1a73e8;">🚗 Ճանապարհ: <span id="totalTransport">0</span> դրամ</div>
+        <div style="color: #5f6368;">📦 Այլ: <span id="totalOther">0</span> դրամ</div>
+        <hr>
+        <div style="font-size: 18px;">🔥 Ընդհանուր: <span id="totalAll">0</span> դրամ</div>
+    </div>
+
+    <div class="history" id="history">
+        <strong>Վերջին գործողություններ.</strong>
+    </div>
+
+    <button class="clear-btn" onclick="clearData()">Ջնջել ամբողջը</button>
+</div>
+
+<script>
+    let expenses = JSON.parse(localStorage.getItem('myExpensesApp')) || [];
+
+    function updateApp() {
+        let totals = { "Սնունդ": 0, "Ճանապարհ": 0, "Այլ": 0 };
+        let historyDiv = document.getElementById('history');
+        historyDiv.innerHTML = "<strong>Վերջին գործողություններ.</strong>";
+
+        expenses.forEach((item, index) => {
+            totals[item.cat] += item.amt;
+            historyDiv.innerHTML += `<div class="item"><span>${item.cat}: ${item.amt} դրամ</span> <small>${item.date}</small></div>`;
+        });
+
+        document.getElementById('totalFood').innerText = totals["Սնունդ"];
+        document.getElementById('totalTransport').innerText = totals["Ճանապարհ"];
+        document.getElementById('totalOther').innerText = totals["Այլ"];
+        document.getElementById('totalAll').innerText = totals["Սնունդ"] + totals["Ճանապարհ"] + totals["Այլ"];
+        
+        localStorage.setItem('myExpensesApp', JSON.stringify(expenses));
+    }
+
+    function addExpense() {
+        let cat = document.getElementById('category').value;
+        let amt = parseFloat(document.getElementById('amount').value);
+        let date = new Date().toLocaleDateString();
+
+        if (amt > 0) {
+            expenses.push({ cat, amt, date });
+            document.getElementById('amount').value = '';
+            updateApp();
+        } else {
+            alert("Խնդրում ենք մուտքագրել թիվ");
+        }
+    }
+
+    function clearData() {
+        if (confirm("Վստա՞հ եք, որ ուզում եք մաքրել բոլոր տվյալները:")) {
+            expenses = [];
+            updateApp();
+        }
+    }
+
+    updateApp();
+</script>
+
+</body>
+</html>
